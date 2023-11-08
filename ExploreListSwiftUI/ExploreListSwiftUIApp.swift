@@ -12,6 +12,9 @@ struct ExploreListSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
             ListView()
+                .onAppear {
+                    LocalizationSystem.sharedInstance.setLanguage(languageCode: "en")
+                }
         }
     }
 }

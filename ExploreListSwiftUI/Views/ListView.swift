@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+enum Language: Equatable {
+    case arabic
+    case english
+}
+
 struct ListView: View {
     
     // Just Samples
@@ -26,8 +31,33 @@ struct ListView: View {
     //Multi-Selection
     @State var multiselection: Set<UUID> = Set<UUID>()
     
+    //
+    
+    @State var favoriteLanguage: Language = .english
+    @State var isRTL: Bool = false
+    
     var body: some View {
         NavigationStack {
+            HStack {
+                Spacer()
+                Picker("", selection: $favoriteLanguage) {
+                    Text("Arabic").tag(Language.arabic)
+                    Text("English").tag(Language.english)
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: favoriteLanguage) { language in
+                    if language == .arabic {
+                        LocalizationSystem.sharedInstance.setLanguage(languageCode: "ar")
+                        isRTL = true
+                    } else {
+                        LocalizationSystem.sharedInstance.setLanguage(languageCode: "en")
+                        isRTL = false
+                    }
+                }
+                Spacer()
+            }
+            .flipsForRightToLeftLayoutDirection(false)
+            
             List(selection: $multiselection) {
                 Section {
                     ForEach(todayTodos) { todo in
@@ -43,7 +73,7 @@ struct ListView: View {
                 } header: {
                     Text(Date().formatted(date: .abbreviated, time: .omitted))
                 } footer: {
-                   Text("Footer 1")
+                    Text("footer1")
                         .fontWeight(.light)
                         .fontWidth(.condensed)
                 }
@@ -87,15 +117,17 @@ struct ListView: View {
                     tomorrowTodos = copyOfTomorrowTodos
                 }
             }
-            .navigationTitle("Todo List")
+            .navigationTitle("Todo List".localized)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     EditButton()
                 }
             }
             Text("\(multiselection.count) selected")
-        }
+                
+        }.environment(\.layoutDirection, isRTL ? .rightToLeft : .leftToRight)
     }
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
